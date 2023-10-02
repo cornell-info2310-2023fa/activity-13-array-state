@@ -35,6 +35,8 @@ export default function App() {
     }
   ];
 
+  const [docReadCounts, setDocReadCounts] = useState(reactDocs.map(doc => ({ id: doc.id, count: 0 })));
+  const [docFavorites, setDocFavorites] = useState(reactDocs.map(doc => ({ id: doc.id, isFavorite: false })));
   const [panelActiveIndex, setPanelActiveIndex] = useState(reactDocs[0].id);
   const [appearance, setAppearance] = useState({
     isDarkMode: false,
@@ -59,17 +61,35 @@ export default function App() {
       {reactDocs.map(doc => (
         <AccordionPanel
           key={doc.id}
-          title={doc.title + ' (' + 0 + ')'}
+          title={doc.title + ' (' + docReadCounts.find(readCount => (doc.id === readCount.id)).count + ')'}
           isExpanded={panelActiveIndex === doc.id}
           onActivate={() => {
             setPanelActiveIndex(doc.id);
-            console.log("TODO: update read count (" + doc.id + ")");
+
+            setDocReadCounts(docReadCounts.map(readCount => {
+              if (doc.id === readCount.id) {
+                return { ...readCount, count: readCount.count += 1 };
+              } else {
+                return readCount;
+              }
+            }));
           }}
           darkMode={appearance.isDarkMode}
         >
           <FavoriteButton
-            isActive={false}
-            onToggleFavorite={() => console.log("TODO: toggle favorite (" + doc.id + ")")}
+            isActive={
+              docFavorites.find(favorites => (favorites.id === doc.id)).isFavorite
+            }
+            onToggleFavorite={
+              () => (setDocFavorites(docFavorites.map(docFavorite => {
+                if (docFavorite.id === doc.id) {
+                  return { ...docFavorite, isFavorite: !docFavorite.isFavorite };
+                } else {
+                  return docFavorite;
+                }
+              }
+              )))
+            }
           />
           {doc.body}
         </AccordionPanel>
